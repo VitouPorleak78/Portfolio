@@ -218,15 +218,21 @@ skillsData.forEach((skill) => {
     skillsContainer.appendChild(card);
 });
 
-// 5. Scroll Intersection Observer + Immediate Viewport Check
+// 5. Bidirectional Scroll Intersection Observer (Animates Down & Up)
 function revealElement(el) {
     el.classList.add('in-view');
+}
+
+function hideElement(el) {
+    el.classList.remove('in-view');
 }
 
 const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             revealElement(entry.target);
+        } else {
+            hideElement(entry.target);
         }
     });
 }, {
@@ -237,8 +243,11 @@ const revealObserver = new IntersectionObserver((entries) => {
 function triggerVisibleReveals() {
     document.querySelectorAll('[data-reveal]').forEach(el => {
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight - 30) {
+        const isVisible = rect.top < window.innerHeight - 30 && rect.bottom > 30;
+        if (isVisible) {
             revealElement(el);
+        } else {
+            hideElement(el);
         }
     });
 }
