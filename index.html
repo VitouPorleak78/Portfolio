@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitou Porleak — Software Engineer</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        appleLight: '#fbfbfd',
+                        appleGray: '#f5f5f7',
+                        appleInk: '#1d1d1f',
+                        appleMuted: '#6e6e73',
+                        appleBlue: '#0071e3',
+                        appleDarkBg: '#0b0c10',
+                        appleDarkCard: '#15171e',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased selection:bg-appleBlue selection:text-white">
+
+    <!-- =========================================================
+         TACTICAL HUD INTRO OVERLAY
+         ========================================================= -->
+    <div id="hud-intro" class="fixed inset-0 z-[100] bg-[#090b10] text-slate-200 flex flex-col justify-between p-6 sm:p-10 font-mono transition-all duration-700">
+        <div class="flex justify-between items-center text-[11px] sm:text-xs text-slate-400 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>TACTICAL_HUD // SYS_BOOT_v4.0</span>
+            </div>
+            <div id="hud-clock" class="text-cyan-400">UTC 00:00:00</div>
+        </div>
+
+        <div class="my-auto flex flex-col items-center justify-center text-center max-w-xl mx-auto w-full">
+            <div class="relative w-44 h-44 sm:w-52 sm:h-52 flex items-center justify-center mb-8">
+                <svg class="w-full h-full text-cyan-400/30" viewBox="0 0 200 200" fill="none">
+                    <circle cx="100" cy="100" r="92" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+                    <circle cx="100" cy="100" r="68" stroke="currentColor" stroke-width="1"/>
+                    <circle cx="100" cy="100" r="36" stroke="#22d3ee" stroke-width="1.5" stroke-opacity="0.6"/>
+                    <line x1="100" y1="0" x2="100" y2="24" stroke="#22d3ee" stroke-width="1.5"/>
+                    <line x1="100" y1="176" x2="100" y2="200" stroke="#22d3ee" stroke-width="1.5"/>
+                    <line x1="0" y1="100" x2="24" y2="100" stroke="#22d3ee" stroke-width="1.5"/>
+                    <line x1="176" y1="100" x2="200" y2="100" stroke="#22d3ee" stroke-width="1.5"/>
+                </svg>
+                <svg class="w-full h-full absolute inset-0 radar-sweep" viewBox="0 0 200 200" fill="none">
+                    <path d="M100 100 L100 8 A92 92 0 0 1 182 58 Z" fill="url(#radarGrad)"/>
+                    <defs>
+                        <linearGradient id="radarGrad" x1="100" y1="8" x2="182" y2="58" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="absolute text-center">
+                    <span class="block text-[10px] tracking-widest text-slate-400">TARGET_ID</span>
+                    <span class="text-sm sm:text-base font-bold text-white tracking-wider">VP // 2007</span>
+                </div>
+            </div>
+
+            <div class="w-full bg-white/[0.04] border border-white/10 p-4 rounded-xl text-left text-xs space-y-1.5 mb-6">
+                <div id="hud-telemetry" class="text-cyan-400 min-h-[54px] leading-relaxed"></div>
+                <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-2">
+                    <div id="hud-progress" class="h-full bg-cyan-400 w-0 transition-all duration-150"></div>
+                </div>
+            </div>
+
+            <button id="enter-portfolio-btn" class="px-6 py-2.5 bg-cyan-400 text-slate-950 font-bold text-xs tracking-widest rounded-full hover:bg-cyan-300 transition-all shadow-[0_0_25px_rgba(34,211,238,0.4)]">
+                [ INITIALIZE_WORKSPACE ]
+            </button>
+        </div>
+
+        <div class="flex justify-between items-center text-[11px] text-slate-500 border-t border-white/10 pt-4">
+            <span>CADT // SOFTWARE ENGINEERING Y3</span>
+            <span>PHNOM PENH, KH</span>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         APPLE LIQUID GLASS DYNAMIC TOPBAR
+         ========================================================= -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-4 pt-4 pointer-events-none">
+        <nav id="dynamic-nav" class="pointer-events-auto max-w-5xl mx-auto liquid-glass rounded-full px-5 sm:px-6 py-2.5 relative overflow-hidden">
+            <div class="flex items-center justify-between gap-3">
+                <!-- Brand & Replay HUD -->
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="#hero" class="font-semibold text-sm sm:text-base tracking-tight flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-appleBlue"></span>
+                        <span>Vitou Porleak</span>
+                    </a>
+                    <button id="replay-hud-btn" title="Replay Tactical HUD Intro" class="hidden xl:inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-black/10 dark:border-white/15 opacity-70 hover:opacity-100 transition-opacity">
+                        <span>↻ HUD</span>
+                    </button>
+                </div>
+
+                <!-- Clean Navigation Links with Sliding Pill -->
+                <div class="hidden lg:flex items-center relative p-1 rounded-full" id="nav-links-wrapper">
+                    <div id="nav-pill" class="absolute top-1 bottom-1 left-0 rounded-full nav-pill-surface opacity-0 pointer-events-none"></div>
+                    <a href="#about" data-section="about" class="nav-link relative z-10 px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap">Identity</a>
+                    <a href="#skills" data-section="skills" class="nav-link relative z-10 px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap">Skills</a>
+                    <a href="#projects" data-section="projects" class="nav-link relative z-10 px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap">Projects</a>
+                    <a href="#education" data-section="education" class="nav-link relative z-10 px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap">Timeline</a>
+                    <a href="#contact" data-section="contact" class="nav-link relative z-10 px-3.5 py-1.5 text-xs font-medium transition-colors whitespace-nowrap">Let's Work Together</a>
+                </div>
+
+                <!-- Right Controls: Soft Theme Toggle & Contact Me -->
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <button id="theme-toggle" aria-label="Toggle Theme" class="w-8 h-8 rounded-full border border-black/10 dark:border-white/15 flex items-center justify-center text-xs hover:scale-105 transition-transform">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    <a href="#contact" class="px-4 py-1.5 rounded-full bg-appleBlue text-white font-medium text-xs hover:bg-blue-600 transition-all shadow-sm whitespace-nowrap">
+                        Contact Me
+                    </a>
+                </div>
+            </div>
+
+            <!-- Scroll Progress Hairline Bar -->
+            <div class="absolute bottom-0 left-5 right-5 h-[2px] bg-transparent overflow-hidden rounded-full">
+                <div id="scroll-progress-bar" class="h-full bg-gradient-to-r from-appleBlue via-sky-400 to-indigo-500 w-0"></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="relative z-10">
+        <!-- =========================================================
+             HERO SECTION (APPLE KEYNOTE OPENING)
+             ========================================================= -->
+        <section id="hero" class="min-h-screen flex items-center pt-28 pb-16 px-6 sm:px-12 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+                <div class="lg:col-span-7 space-y-6 slide-left" data-reveal>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full surface-pill text-xs font-medium text-appleBlue">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Available for Software Engineering Internships</span>
+                    </div>
+
+                    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
+                        Vitou Porleak.<br>
+                        <span class="muted-text font-semibold">Built to scale.</span>
+                    </h1>
+
+                    <div class="font-mono text-sm sm:text-base text-appleBlue min-h-[28px]">
+                        <span id="hero-typed" class="cursor-blink"></span>
+                    </div>
+
+                    <p class="text-base sm:text-xl muted-text leading-relaxed max-w-xl font-normal">
+                        Year 3 Software Engineering student at the <span class="font-semibold primary-text">Cambodia Academy of Digital Technology (CADT)</span>. Designing intuitive interfaces and engineering full-stack, mobile, and AI-powered systems.
+                    </p>
+
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <a href="#projects" class="px-7 py-3.5 rounded-full bg-appleBlue text-white font-medium text-sm hover:bg-blue-600 transition-all shadow-md shadow-appleBlue/20">
+                            Explore Projects
+                        </a>
+                        <a href="#contact" class="px-7 py-3.5 rounded-full surface-card font-medium text-sm hover:scale-[1.02] transition-transform">
+                            Let's Work Together &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 flex justify-center lg:justify-end slide-right delay-200" data-reveal>
+                    <div class="surface-card rounded-[2rem] p-4 max-w-[340px] sm:max-w-[380px] w-full shadow-xl">
+                        <div class="rounded-[1.5rem] overflow-hidden aspect-[4/5] bg-slate-200 dark:bg-slate-800">
+                            <img src="Vitou.JPG" alt="Vitou Porleak" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                        </div>
+                        <div class="flex justify-between items-center text-xs muted-text mt-3.5 px-2 font-medium">
+                            <span>CADT Software Engineering</span>
+                            <span class="text-appleBlue">Phnom Penh, KH</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 01: IDENTITY (APPLE FULL-SCREEN FRONT PAGE + CONTENT)
+             ========================================================= -->
+        <section id="about" class="chapter-section">
+            <div class="min-h-screen flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+                <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-appleBlue mb-4 slide-up" data-reveal>Identity</span>
+                <h2 class="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.06] mb-6 slide-up delay-100" data-reveal>
+                    Engineering with clarity.<br>
+                    <span class="muted-text">Designed for people.</span>
+                </h2>
+                <p class="text-lg sm:text-xl muted-text max-w-2xl leading-relaxed slide-up delay-200" data-reveal>
+                    Bridging clean frontend craft with reliable backend architecture.
+                </p>
+                <div class="mt-12 text-xs muted-text font-mono animate-bounce">↓ Scroll to inspect profile</div>
+            </div>
+
+            <div class="pb-28 px-6 sm:px-12 max-w-6xl mx-auto">
+                <div class="surface-card rounded-[2rem] p-8 sm:p-12 grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+                    <div class="md:col-span-7 space-y-5 text-base sm:text-lg leading-relaxed slide-left" data-reveal>
+                        <p>
+                            Hello! I'm Vitou, a 3rd-year Software Engineering student at the <span class="font-semibold text-appleBlue">Cambodia Academy of Digital Technology (CADT)</span> in Phnom Penh.
+                        </p>
+                        <p class="muted-text">
+                            My focus sits at the intersection of UX/UI design and full-stack software architecture. From multi-tenant digital loyalty platforms and offline-first Flutter apps to BERT/LLM syllabus mapping systems, I build software that solves real operational problems.
+                        </p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
+                            <div class="p-4 rounded-2xl surface-subtle">
+                                <span class="text-[11px] uppercase tracking-wider muted-text block">Institution</span>
+                                <span class="font-semibold text-sm sm:text-base mt-1 block">CADT (Year 3)</span>
+                            </div>
+                            <div class="p-4 rounded-2xl surface-subtle">
+                                <span class="text-[11px] uppercase tracking-wider muted-text block">Core Focus</span>
+                                <span class="font-semibold text-sm sm:text-base text-appleBlue mt-1 block">Full-Stack &amp; AI</span>
+                            </div>
+                            <div class="p-4 rounded-2xl surface-subtle col-span-2 sm:col-span-1">
+                                <span class="text-[11px] uppercase tracking-wider muted-text block">Location</span>
+                                <span class="font-semibold text-sm sm:text-base mt-1 block">Phnom Penh, KH</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-5 flex justify-center slide-right delay-200" data-reveal>
+                        <div class="w-64 h-80 sm:w-72 sm:h-88 rounded-[1.75rem] overflow-hidden shadow-lg surface-subtle p-2">
+                            <img src="Face.JPG" alt="Vitou Porleak Portrait" class="w-full h-full object-cover object-top rounded-[1.35rem]" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 02: SKILLS (APPLE FRONT PAGE + CONSISTENT RECTANGLE CARDS)
+             ========================================================= -->
+        <section id="skills" class="chapter-section alt-band">
+            <div class="min-h-screen flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+                <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-appleBlue mb-4 slide-up" data-reveal>Technical Arsenal</span>
+                <h2 class="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.06] mb-6 slide-up delay-100" data-reveal>
+                    Modern stack.<br>
+                    <span class="muted-text">End-to-end execution.</span>
+                </h2>
+                <p class="text-lg sm:text-xl muted-text max-w-2xl leading-relaxed slide-up delay-200" data-reveal>
+                    Full-width showcase of the languages, frameworks, and engines I build with every day.
+                </p>
+                <div class="mt-12 text-xs muted-text font-mono animate-bounce">↓ Scroll to explore skills</div>
+            </div>
+
+            <div class="pb-28 px-6 sm:px-12 max-w-6xl mx-auto">
+                <div id="skills-container" class="flex flex-col gap-6 w-full">
+                    <!-- Injected via script.js: Full-width rectangular cards with graphic consistently on the left -->
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 03: PROJECTS (APPLE FRONT PAGE + ALTERNATING RECTANGLE CARDS)
+             ========================================================= -->
+        <section id="projects" class="chapter-section">
+            <div class="min-h-screen flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+                <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-appleBlue mb-4 slide-up" data-reveal>Selected Work</span>
+                <h2 class="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.06] mb-6 slide-up delay-100" data-reveal>
+                    Featured Projects.<br>
+                    <span class="muted-text">From concept to code.</span>
+                </h2>
+                <p class="text-lg sm:text-xl muted-text max-w-2xl leading-relaxed slide-up delay-200" data-reveal>
+                    AI curriculum intelligence, fleet management platforms, productivity apps, and 3D physics simulations.
+                </p>
+                <div class="mt-12 text-xs muted-text font-mono animate-bounce">↓ Scroll to view deployments</div>
+            </div>
+
+            <!-- Alternating Rectangular Project Cards (Odd: Picture Left, Even: Picture Right) -->
+            <div class="pb-28 px-6 sm:px-12 max-w-6xl mx-auto">
+                <div class="flex flex-col gap-8 w-full">
+                    
+                    <!-- Project 1: Image on LEFT (md:order-1), Content on RIGHT (md:order-2) -->
+                    <a href="https://docs.google.com/document/d/1G2FEhhJXMDw48yZNcLjr1Bi72MJgc4Bgn8kT4LmAJHA/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="project-card slide-left w-full surface-card rounded-[2rem] overflow-hidden grid grid-cols-1 md:grid-cols-12 items-stretch group hover:scale-[1.005]" data-reveal>
+                        <div class="md:col-span-5 md:order-1 bg-slate-200 dark:bg-slate-800 relative min-h-[220px] overflow-hidden">
+                            <img src="project1.jpg" alt="CLO-PLO Syllabus Mapper Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                        <div class="md:col-span-7 md:order-2 p-7 sm:p-9 flex flex-col justify-between gap-6">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-appleBlue">AI &amp; NLP Research</span>
+                                    <span class="w-9 h-9 rounded-full surface-subtle flex items-center justify-center text-appleBlue font-semibold group-hover:bg-appleBlue group-hover:text-white transition-colors">&nearr;</span>
+                                </div>
+                                <h3 class="text-2xl font-bold group-hover:text-appleBlue transition-colors">CLO-PLO Syllabus Mapper</h3>
+                                <p class="muted-text text-sm sm:text-base leading-relaxed">
+                                    Automated system mapping teacher syllabi to learning outcomes, evaluating rule-based NLP, BERT deep learning, and Generative LLM architectures.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs font-medium pt-2">
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">AI / LLM</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Python</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">BERT</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 2: Content on LEFT (md:order-1), Image on RIGHT (md:order-2) -->
+                    <a href="https://github.com/VitouPorleak78/Smart-Vehicle-Fleet.git" target="_blank" rel="noopener noreferrer" class="project-card slide-right w-full surface-card rounded-[2rem] overflow-hidden grid grid-cols-1 md:grid-cols-12 items-stretch group hover:scale-[1.005]" data-reveal>
+                        <div class="md:col-span-5 md:order-2 bg-slate-200 dark:bg-slate-800 relative min-h-[220px] overflow-hidden">
+                            <img src="project2.jpg" alt="Smart Vehicle Fleet Management Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                        <div class="md:col-span-7 md:order-1 p-7 sm:p-9 flex flex-col justify-between gap-6">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-appleBlue">Full-Stack Platform</span>
+                                    <span class="w-9 h-9 rounded-full surface-subtle flex items-center justify-center text-appleBlue font-semibold group-hover:bg-appleBlue group-hover:text-white transition-colors">&nearr;</span>
+                                </div>
+                                <h3 class="text-2xl font-bold group-hover:text-appleBlue transition-colors">Smart Vehicle Fleet Mgt.</h3>
+                                <p class="muted-text text-sm sm:text-base leading-relaxed">
+                                    Comprehensive fleet management platform developed for Year 2 Term 3 coursework, featuring RESTful backend APIs and relational MySQL modeling.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs font-medium pt-2">
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">React</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Express</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">MySQL</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 3: Image on LEFT (md:order-1), Content on RIGHT (md:order-2) -->
+                    <a href="https://github.com/VitouPorleak78/Tamdan.git" target="_blank" rel="noopener noreferrer" class="project-card slide-left w-full surface-card rounded-[2rem] overflow-hidden grid grid-cols-1 md:grid-cols-12 items-stretch group hover:scale-[1.005]" data-reveal>
+                        <div class="md:col-span-5 md:order-1 bg-slate-200 dark:bg-slate-800 relative min-h-[220px] overflow-hidden">
+                            <img src="project3.jpg" alt="TamDan Web App Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                        <div class="md:col-span-7 md:order-2 p-7 sm:p-9 flex flex-col justify-between gap-6">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-appleBlue">Productivity Web App</span>
+                                    <span class="w-9 h-9 rounded-full surface-subtle flex items-center justify-center text-appleBlue font-semibold group-hover:bg-appleBlue group-hover:text-white transition-colors">&nearr;</span>
+                                </div>
+                                <h3 class="text-2xl font-bold group-hover:text-appleBlue transition-colors">TamDan (តាមដាន)</h3>
+                                <p class="muted-text text-sm sm:text-base leading-relaxed">
+                                    Sleek, responsive web application designed for daily routine organization and personal productivity task tracking.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs font-medium pt-2">
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">React</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Vite</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Tailwind CSS</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 4: Content on LEFT (md:order-1), Image on RIGHT (md:order-2) -->
+                    <a href="https://github.com/Sotchi10/GameDevelopment-Practce1.git" target="_blank" rel="noopener noreferrer" class="project-card slide-right w-full surface-card rounded-[2rem] overflow-hidden grid grid-cols-1 md:grid-cols-12 items-stretch group hover:scale-[1.005]" data-reveal>
+                        <div class="md:col-span-5 md:order-2 bg-slate-200 dark:bg-slate-800 relative min-h-[220px] overflow-hidden">
+                            <img src="project4.jpg" alt="Obstacle Escape 3D Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                        <div class="md:col-span-7 md:order-1 p-7 sm:p-9 flex flex-col justify-between gap-6">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-appleBlue">3D Game Simulation</span>
+                                    <span class="w-9 h-9 rounded-full surface-subtle flex items-center justify-center text-appleBlue font-semibold group-hover:bg-appleBlue group-hover:text-white transition-colors">&nearr;</span>
+                                </div>
+                                <h3 class="text-2xl font-bold group-hover:text-appleBlue transition-colors">Obstacle Escape 3D</h3>
+                                <p class="muted-text text-sm sm:text-base leading-relaxed">
+                                    3D obstacle course game built in Unity featuring custom C# physics movement, dynamic hazard triggers, particle systems, and a 60-second timer.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs font-medium pt-2">
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Unity 3D</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">C#</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Physics</span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Project 5: Image on LEFT (md:order-1), Content on RIGHT (md:order-2) -->
+                    <a href="https://github.com/VitouPorleak78/Sombot-1.0.git" target="_blank" rel="noopener noreferrer" class="project-card slide-left w-full surface-card rounded-[2rem] overflow-hidden grid grid-cols-1 md:grid-cols-12 items-stretch group hover:scale-[1.005]" data-reveal>
+                        <div class="md:col-span-5 md:order-1 bg-slate-200 dark:bg-slate-800 relative min-h-[220px] overflow-hidden">
+                            <img src="project5.jpg" alt="Python Billing App Preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                        </div>
+                        <div class="md:col-span-7 md:order-2 p-7 sm:p-9 flex flex-col justify-between gap-6">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-appleBlue">Desktop Utility</span>
+                                    <span class="w-9 h-9 rounded-full surface-subtle flex items-center justify-center text-appleBlue font-semibold group-hover:bg-appleBlue group-hover:text-white transition-colors">&nearr;</span>
+                                </div>
+                                <h3 class="text-2xl font-bold group-hover:text-appleBlue transition-colors">Python Billing App</h3>
+                                <p class="muted-text text-sm sm:text-base leading-relaxed">
+                                    Desktop time-tracking and automated billing application compiled into a standalone Windows executable (.exe) via PyInstaller.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs font-medium pt-2">
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Python</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">PyInstaller</span>
+                                <span class="px-3.5 py-1.5 rounded-full surface-subtle">Windows .exe</span>
+                            </div>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 04: TIMELINE (WITH VERTICAL LINE & NODE CONNECTORS)
+             ========================================================= -->
+        <section id="education" class="chapter-section alt-band">
+            <div class="min-h-screen flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+                <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-appleBlue mb-4 slide-up" data-reveal>Timeline</span>
+                <h2 class="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.06] mb-6 slide-up delay-100" data-reveal>
+                    Academic foundation.<br>
+                    <span class="muted-text">Leadership in action.</span>
+                </h2>
+                <p class="text-lg sm:text-xl muted-text max-w-2xl leading-relaxed slide-up delay-200" data-reveal>
+                    Education milestones and student leadership experience.
+                </p>
+                <div class="mt-12 text-xs muted-text font-mono animate-bounce">↓ Scroll to view milestones</div>
+            </div>
+
+            <!-- Timeline Cards with Vertical Line & Nodes -->
+            <div class="pb-28 px-6 sm:px-12 max-w-5xl mx-auto">
+                <div class="relative pl-8 sm:pl-12 space-y-8">
+                    <!-- Animated Vertical Timeline Line -->
+                    <div class="absolute left-3 sm:left-4 top-6 bottom-6 w-[2px] bg-gradient-to-b from-appleBlue via-sky-400 to-slate-300 dark:to-slate-700 timeline-rail" data-reveal></div>
+
+                    <!-- Entry 1 -->
+                    <div class="relative surface-card rounded-[2rem] p-8 sm:p-10 slide-right" data-reveal>
+                        <!-- Circular Node on the Line -->
+                        <div class="absolute -left-[27px] sm:-left-[39px] top-10 w-4 h-4 rounded-full bg-appleBlue ring-4 ring-appleGray dark:ring-appleDarkBg shadow-md"></div>
+                        
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-3 text-xs font-semibold">
+                            <span class="text-appleBlue">2023 — PRESENT • YEAR 3</span>
+                            <span class="px-3 py-1 rounded-full bg-appleBlue/10 text-appleBlue">Current</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">Bachelor of Software Engineering</h3>
+                        <p class="text-sm font-medium muted-text mb-4">Cambodia Academy of Digital Technology (CADT) • Phnom Penh</p>
+                        <p class="muted-text text-base leading-relaxed">
+                            Building full-stack web applications, cross-platform Flutter apps, and 3D Unity simulations while serving as UX/UI designer and developer on student engineering teams.
+                        </p>
+                    </div>
+
+                    <!-- Entry 2 -->
+                    <div class="relative surface-card rounded-[2rem] p-8 sm:p-10 slide-right delay-100" data-reveal>
+                        <!-- Circular Node on the Line -->
+                        <div class="absolute -left-[27px] sm:-left-[39px] top-10 w-4 h-4 rounded-full bg-slate-400 dark:bg-slate-600 ring-4 ring-appleGray dark:ring-appleDarkBg"></div>
+
+                        <div class="flex flex-wrap justify-between items-center gap-2 mb-3 text-xs font-semibold">
+                            <span class="muted-text">CLASS OF 2023</span>
+                            <span class="px-3 py-1 rounded-full surface-subtle muted-text">Graduated</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">Baccalaureate (Bac II)</h3>
+                        <p class="text-sm font-medium muted-text mb-4">High School • Siem Reap</p>
+                        <p class="muted-text text-base leading-relaxed">
+                            Served as a High School Student Council Member and Event Master of Ceremonies (MC), leading school-wide events and student initiatives.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             SECTION 05: LET'S WORK TOGETHER (APPLE FRONT PAGE + CONTACT)
+             ========================================================= -->
+        <section id="contact" class="chapter-section">
+            <div class="min-h-screen flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
+                <span class="text-xs sm:text-sm font-semibold tracking-widest uppercase text-appleBlue mb-4 slide-up" data-reveal>Collaborate</span>
+                <h2 class="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.06] mb-6 slide-up delay-100" data-reveal>
+                    Let's Work Together.<br>
+                    <span class="muted-text">Start a conversation.</span>
+                </h2>
+                <p class="text-lg sm:text-xl muted-text max-w-2xl leading-relaxed slide-up delay-200" data-reveal>
+                    Open for Software Engineering internships, full-stack builds, and AI/LLM collaborations.
+                </p>
+                <div class="mt-12 text-xs muted-text font-mono animate-bounce">↓ Scroll to reach out</div>
+            </div>
+
+            <div class="pb-28 px-6 sm:px-12 max-w-6xl mx-auto">
+                <div class="surface-card rounded-[2rem] p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    <div class="lg:col-span-5 space-y-6 slide-left" data-reveal>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-appleBlue/10 text-xs font-semibold text-appleBlue">
+                            <span>● Available for Internships</span>
+                        </div>
+                        <h3 class="text-2xl sm:text-3xl font-bold leading-snug">
+                            Ready to build something great together?
+                        </h3>
+                        <p class="muted-text text-sm sm:text-base leading-relaxed">
+                            Reach out directly via email or send a message using the form. I respond promptly to internship opportunities and project inquiries.
+                        </p>
+
+                        <div class="space-y-3 pt-2 text-xs">
+                            <div class="p-4 rounded-2xl surface-subtle flex items-center justify-between gap-3">
+                                <div>
+                                    <span class="muted-text block text-[10px] uppercase tracking-wider">Direct Email</span>
+                                    <span class="font-semibold text-sm">vitouporleak78@gmail.com</span>
+                                </div>
+                                <button id="copy-email-btn" class="px-3.5 py-1.5 rounded-full bg-appleBlue text-white font-medium hover:bg-blue-600 transition-colors whitespace-nowrap">
+                                    Copy
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 font-medium">
+                                <a href="https://github.com/VitouPorleak78" target="_blank" rel="noopener noreferrer" class="p-4 rounded-2xl surface-subtle hover:border-appleBlue transition-colors flex items-center justify-between">
+                                    <span>GitHub</span>
+                                    <span class="text-appleBlue">&nearr;</span>
+                                </a>
+                                <a href="mailto:vitouporleak78@gmail.com" class="p-4 rounded-2xl surface-subtle hover:border-appleBlue transition-colors flex items-center justify-between">
+                                    <span>Mail App</span>
+                                    <span class="text-appleBlue">&nearr;</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 slide-right delay-200" data-reveal>
+                        <form id="contact-form" class="space-y-4 p-6 sm:p-8 rounded-[1.5rem] surface-subtle">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="sender-name" class="block text-xs font-medium muted-text mb-1.5">Your Name</label>
+                                    <input type="text" id="sender-name" required placeholder="Alex Chen" class="w-full px-4 py-3 rounded-xl surface-input text-sm focus:outline-none focus:ring-2 focus:ring-appleBlue transition-all" />
+                                </div>
+                                <div>
+                                    <label for="sender-email" class="block text-xs font-medium muted-text mb-1.5">Your Email</label>
+                                    <input type="email" id="sender-email" required placeholder="alex@company.com" class="w-full px-4 py-3 rounded-xl surface-input text-sm focus:outline-none focus:ring-2 focus:ring-appleBlue transition-all" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="inquiry-type" class="block text-xs font-medium muted-text mb-1.5">Collaboration Scope</label>
+                                <select id="inquiry-type" class="w-full px-4 py-3 rounded-xl surface-input text-sm focus:outline-none focus:ring-2 focus:ring-appleBlue transition-all">
+                                    <option value="Software Engineering Internship">Software Engineering Internship</option>
+                                    <option value="Full-Stack Web / Mobile Project">Full-Stack Web / Mobile Project</option>
+                                    <option value="AI / LLM Integration">AI / LLM Integration</option>
+                                    <option value="General Networking">General Networking</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="sender-message" class="block text-xs font-medium muted-text mb-1.5">Message</label>
+                                <textarea id="sender-message" rows="4" required placeholder="Tell me about your team, role, or project..." class="w-full px-4 py-3 rounded-xl surface-input text-sm focus:outline-none focus:ring-2 focus:ring-appleBlue transition-all resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full py-3.5 rounded-full bg-appleBlue text-white font-semibold text-sm hover:bg-blue-600 transition-all shadow-md shadow-appleBlue/20">
+                                Send Message &rarr;
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-10 px-6 border-t border-black/5 dark:border-white/10 text-center text-xs muted-text">
+        <p>Designed &amp; Engineered by Vitou Porleak &copy; <span id="year"></span></p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 surface-card px-4 py-2.5 rounded-full text-xs font-medium text-appleBlue shadow-xl translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        ✓ Copied vitouporleak78@gmail.com
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
